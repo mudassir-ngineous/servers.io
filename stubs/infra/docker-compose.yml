@@ -1,0 +1,77 @@
+# This is a docker-compose file for the servers.io project.
+# It is used to start the project in a containerized environment.
+# The project is a collection of servers that are written in Go, Rust, and WebAssembly, 
+# More web servers will be added in the future.
+# The project is designed to be run on a single machine.
+
+# Instructions: (You can also run the pre-setup.sh script to clone the repository and create the shared-data directory)
+# 1. Clone the servers.io repository in the directory called OSS in your home directory.
+# 2. Create a directory called shared-data in the OSS directory.
+# 3. Run `docker-compose --project-name oss -f stubs/infra/docker-compose.yml up -d`
+# 4. The following ports are exposed for each container
+#    - Go web server: 8080
+#    - Rust web server: 8888
+#    - WebAssembly server: 8000
+
+version: '3.8'
+
+services:
+  golang-dev:
+    image: golang:1.22
+    volumes:
+      - golang-data:/usr/code
+      - shared-data:/data
+    working_dir: /usr/code
+    environment:
+      - GOPATH=/go
+    command: tail -f /dev/null  # Keeps container running
+    ports:
+      - "8080:8080"  # For Go web server if needed
+
+  rust-dev:
+    image: rust:latest
+    volumes:
+      - rust-data:/usr/code
+      - shared-data:/data
+    working_dir: /usr/code
+    command: tail -f /dev/null  # Keeps container running
+    ports:
+      - "8888:8888"
+
+  wasm-dev:
+    image: rust:latest
+    volumes:
+      - wasm-data:/usr/code
+      - shared-data:/data
+    working_dir: /usr/code
+    environment:
+      - RUSTFLAGS=-C target-feature=+atomics,+bulk-memory,+mutable-globals
+    command: tail -f /dev/null  # Keeps container running
+    ports:
+      - "8000:8000"  # For wasm-pack dev server
+
+volumes:
+  shared-data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${HOME}/OSS/shared-data
+  golang-data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${HOME}/OSS/servers.io/golang
+  rust-data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${HOME}/OSS/servers.io/rust
+  wasm-data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${HOME}/OSS/servers.io/web-assembly
