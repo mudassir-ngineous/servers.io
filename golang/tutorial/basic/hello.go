@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
+	"time"
 )
 
 // example: struct
@@ -97,7 +98,19 @@ func main() {
 	} else {
 		fmt.Println("Result example: result_divide:\t", result_divide)
 	}
-	//
+
+	// goroutine example
+	go sayHello("mudassir") // Runs concurrently
+    fmt.Println("Main function")
+    time.Sleep(time.Second) // Wait for goroutine
+	
+	// channel example
+	ch := make(chan string)
+	go func() {
+		ch <- "Hello from goroutine!"
+	}()
+	msg := <-ch
+	fmt.Println("Channel example: msg:\t", msg)
 }
 
 // add adds two integers and returns their sum.
@@ -124,3 +137,12 @@ func divide(a, b int) (int, error) {
     }
     return a / b, nil
 }
+
+// goroutine
+// A goroutine is a lightweight thread of execution.
+// It is a function that can run concurrently with other functions.
+
+func sayHello(name string) {
+	fmt.Println("Hello,", name)
+}
+
